@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.18...3.31)
 project(ZygiskYin CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -8,7 +8,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fvisibility=hidden -fno-exceptions -fno-rtti -
 set(CMAKE_C_FLAGS_RELEASE "-O3 -fvisibility=hidden")
 
 add_executable(zygiskd src/zygiskd.cpp)
-target_link_libraries(zygiskd PRIVATE pthread)
 target_link_options(zygiskd PRIVATE -s -Wl,--gc-sections)
 
 add_library(zygisk SHARED src/libzygisk.cpp)

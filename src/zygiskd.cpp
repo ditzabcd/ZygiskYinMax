@@ -5,6 +5,7 @@
 #include <sys/un.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/user.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -48,12 +49,15 @@ static int inject_library(pid_t pid) {
     if (!WIFSTOPPED(status)) return -1;
 
     struct user_pt_regs regs;
-    ptrace(PTRACE_GETREGSET, pid, (void*)NT_PRSTATUS, &(struct iovec){&regs, sizeof(regs)});
+    struct iovec iov;
+    iov.iov_base = &regs;
+    iov.iov_len = sizeof(regs);
+    
+    ptrace(PTRACE_GETREGSET, pid, (void*)NT_PRSTATUS, &iov);
 
-    uintptr_t addr = 0;
     for (int i = 0; i < (int)strlen(LIB_PATH); i += 8) {
         long word = 0;
-        memcpy(&word, LIB_PATH + i, 8);
+        memcpy(&word, (const char*)LIB_PATH + i, 8);
         ptrace(PTRACE_POKEDATA, pid, (void*)(regs.sp - 0x1000 + i), (void*)word);
     }
     
@@ -67,7 +71,8 @@ int main() {
     
     int fd = open(STATE_PATH, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd >= 0) {
-        write(fd, "{\"zygote\":1,\"bit\":64,\"modules\":[\"PIFork\"]}", 42);
+        const char *json = "{\"zygote\":1,\"bit\":64,\"modules\":[\"PIFork\"]}";
+        write(fd, json, strlen(json));
         close(fd);
     }
     return 0;

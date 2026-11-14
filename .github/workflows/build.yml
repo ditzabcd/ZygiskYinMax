@@ -25,11 +25,7 @@ jobs:
           mkdir -p module
           cp build/zygiskd module/
           cp build/libzygisk.so module/
-          cp module.prop post-fs-data.sh service.sh customize.sh verify.sh sepolicy.rule module/
-      - name: Generate SHA256
-        run: |
-          cd module
-          sha256sum zygiskd libzygisk.so > sha256.txt
+          cp module.prop post-fs-data.sh service.sh customize.sh sepolicy.rule module/
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:

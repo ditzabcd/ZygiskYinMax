@@ -16,7 +16,6 @@
 #include <errno.h>
 #include <elf.h>
 
-#define SOCK_PATH "/data/adb/zygiskyin.sock"
 #define LIB_PATH  "/data/adb/modules/zygiskyin/libzygisk.so"
 #define STATE_PATH "/data/adb/modules/zygiskyin/state.json"
 
@@ -66,6 +65,12 @@ static int inject_library(pid_t pid) {
 }
 
 int main() {
+    pid_t pid = fork();
+    if (pid < 0) return 1;
+    if (pid > 0) return 0;
+
+    setsid();
+
     pid_t zygote = find_zygote();
     if (zygote > 0) inject_library(zygote);
     
@@ -74,6 +79,10 @@ int main() {
         const char *json = "{\"zygote\":1,\"bit\":64,\"modules\":[\"PIFork\"]}";
         write(fd, json, strlen(json));
         close(fd);
+    }
+    
+    while (1) {
+        sleep(3600);
     }
     return 0;
 }

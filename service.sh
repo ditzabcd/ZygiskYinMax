@@ -4,7 +4,7 @@ until [ "$(getprop sys.boot_completed)" = "1" ]; do sleep 1; done
 
 if ! pidof zygiskd > /dev/null; then
     chmod 755 $MODDIR/zygiskd
-    $MODDIR/zygiskd &
+    $MODDIR/zygiskd
 fi
 
 STATE_FILE="$MODDIR/state.json"

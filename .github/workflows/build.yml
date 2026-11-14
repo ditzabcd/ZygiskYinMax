@@ -1,0 +1,37 @@
+name: Build ZygiskYin
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26b
+          add-to-path: true
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM=android-29 \
+            -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build -j$(nproc)
+      - name: Stage Module
+        run: |
+          mkdir -p module
+          cp build/zygiskd module/
+          cp build/libzygisk.so module/
+          cp module.prop post-fs-data.sh service.sh customize.sh verify.sh sepolicy.rule module/
+      - name: Generate SHA256
+        run: |
+          cd module
+          sha256sum zygiskd libzygisk.so > sha256.txt
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZygiskYin-Release
+          path: module/

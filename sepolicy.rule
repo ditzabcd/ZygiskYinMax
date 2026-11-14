@@ -1,0 +1,3 @@
+allow zygote zygiskd_file:file { read open getattr map };
+allow zygiskd zygote:process { ptrace };
+allow zygiskd self:capability { sys_ptrace };
